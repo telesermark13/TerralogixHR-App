@@ -1,0 +1,3 @@
+PassengerEnabled On
+PassengerAppEnv production
+PassengerPython /home/u774-sod57stjomgq/virtualenv/terralogixenv/3.9/bin/python
