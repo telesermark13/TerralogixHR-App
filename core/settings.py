@@ -86,10 +86,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # It's cleaner and handles special characters in passwords automatically.
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600 # Keeps connections alive for 10 minutes
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'terralogix_db',
+        'USER': 'terralogix_user',
+        'PASSWORD': 'lqC0KAvkMAwcqa0ksWOEjjriIi4Rlhlq',
+        'HOST': 'dpg-d1f57qngi27c73cdtjv0-a.singapore-postgres.render.com',
+        'PORT': '5432',
+    }
 }
 
 
