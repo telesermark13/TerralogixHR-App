@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 't']
 
 # These are the hosts allowed to serve the site. Added your live domain.
-ALLOWED_HOSTS = ['terralogixcorp.com', 'www.terralogixcorp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['terralogixcorp.com', 'www.terralogixcorp.com', 'localhost', '127.0.0.1','192.168.254.121']
 
 
 # --- Application Definition ---
