@@ -35,7 +35,9 @@ ALLOWED_HOSTS = [
     'www.terralogixcorp.com',
     'localhost',
     '127.0.0.1',
-    'terralogixhr-app.onrender.com',  # Add your Render domain here
+    'terralogixhr-app.onrender.com',
+    '.onrender.com',
+    '*',  # <-- REMOVE THIS AFTER DEBUGGING!
 ]
 
 
