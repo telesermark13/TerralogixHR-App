@@ -37,7 +37,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'terralogixhr-app.onrender.com',
     '.onrender.com',
-    '192.168.254.121'
+    '192.168.254.106'
     '*',  # <-- REMOVE THIS AFTER DEBUGGING!
 ]
 
