@@ -32,15 +32,16 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 't']
 # These are the hosts allowed to serve the site. Added your live domain.
 ALLOWED_HOSTS = [
     'terralogixcorp.com',
-    'www.terralogixcorp.com',
     'localhost',
+    'localhost:8000',
+    'www.terralogixcorp.com',
     '127.0.0.1',
     'terralogixhr-app.onrender.com',
     '.onrender.com',
     '192.168.254.106',
     '192.168.254.106:8000',
-    '192.168.254.121',
-    '192.168.254.121:8000',
+    '192.168.254.108',
+    '192.168.254.108:8000',
 ]
 
 

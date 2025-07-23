@@ -391,10 +391,10 @@ def invite_user(request):
     if not created and invitation.accepted:
         return Response({"error": "User already accepted invitation."}, status=400)
 
-    invite_url = f"http://192.168.254.121:8000/accept-invite/{invitation.token}/"
+    invite_url = f"http://192.168.254.106:8000/accept-invite/{invitation.token}/"
     send_mail(
         subject="You're invited to Terralogix HR!",
-        message=f"Welcome! Click here to register: {invite_url}",
+        message=f"Welcome! Click here   to register: {invite_url}",
         from_email="Terralogix HR <noreply@terralogixhr.com>",  # Use your actual sender
         recipient_list=[email],
         fail_silently=False,
@@ -473,9 +473,9 @@ class PayslipViewSet(viewsets.ModelViewSet):
     serializer_class = PayslipSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['employee__full_name', 'pay_period']
-    ordering_fields = ['pay_period', 'created_at']
-    ordering = ['-pay_period']
+    search_fields = ['employee__full_name']
+    ordering_fields = ['issued_date', 'period_from', 'period_to']  # <-- valid fields
+    ordering = ['-issued_date']  # <-- valid field
     def get_queryset(self):
         user = self.request.user
         if user.is_staff or user.is_superuser:
@@ -492,10 +492,10 @@ class AttendanceViewSet(viewsets.ModelViewSet):
     ordering = ['-date']
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or user.is_superuser:
-            return Attendance.objects.all()
         employee = Employee.objects.filter(user=user).first()
-        return Attendance.objects.filter(employee=employee)
+        if employee:
+            return Attendance.objects.filter(employee=employee)
+        return Attendance.objects.none()
     @action(detail=False, methods=['get'])
     def export_csv(self, request):
         # Add your CSV export logic here
