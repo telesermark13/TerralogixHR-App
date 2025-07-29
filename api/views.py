@@ -391,7 +391,7 @@ def invite_user(request):
     if not created and invitation.accepted:
         return Response({"error": "User already accepted invitation."}, status=400)
 
-    invite_url = f"http://192.168.254.106:8000/accept-invite/{invitation.token}/"
+    invite_url = f"https://your-railway-backend-url.up.railway.app/accept-invite/{invitation.token}/"
     send_mail(
         subject="You're invited to Terralogix HR!",
         message=f"Welcome! Click here   to register: {invite_url}",

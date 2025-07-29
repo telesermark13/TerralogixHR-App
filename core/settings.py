@@ -18,10 +18,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'terralogixhr-app.onrender.com',
     '.onrender.com',
-    '192.168.254.106',
-    '192.168.254.106:8000',
-    '192.168.254.108',
-    '192.168.254.108:8000',
+    'https://your-railway-backend-url.up.railway.app/',
+    'https://your-railway-backend-url.up.railway.app/api/',
 ]
 
 INSTALLED_APPS = [
