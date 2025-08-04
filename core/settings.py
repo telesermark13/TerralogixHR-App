@@ -13,14 +13,13 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 't']
 
 ALLOWED_HOSTS = [
     'terralogixcorp.com',
+    'www.terralogixcorp.com',
     'localhost',
     'localhost:8000',
-    'www.terralogixcorp.com',
     '127.0.0.1',
     'terralogixhr-app.onrender.com',
     '.onrender.com',
-    'https://terralogixhr-app-production.up.railway.app/',
-    'https://terralogixhr-app-production.up.railway.app/api/',
+    'terralogixhr-app-production.up.railway.app',
 ]
 
 INSTALLED_APPS = [
