@@ -23,7 +23,7 @@ ALLOWED_HOSTS = [
     'terralogixhr-app-production.up.railway.app',
 ]
 
-# ✅ Needed for admin/forms/CSRf with HTTPS origins
+#  Needed for admin/forms/CSRf with HTTPS origins
 CSRF_TRUSTED_ORIGINS = [
     'https://terralogixcorp.com',
     'https://www.terralogixcorp.com',
@@ -126,7 +126,9 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
-
+REST_FRAMEWORK.update({
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.openapi.AutoSchema",
+})
 # (Keeping your lifetimes as-is; consider reducing in production)
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=100*365),
