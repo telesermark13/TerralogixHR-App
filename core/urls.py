@@ -1,24 +1,16 @@
 """
 URL configuration for core project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+The `urlpatterns` list routes URLs to views.
+https://docs.djangoproject.com/en/5.2/topics/http/urls/
 """
 from django.contrib import admin
 from django.conf import settings
-from api.views import home
 from django.conf.urls.static import static
 from django.urls import path, include
+
+from api import views as api  # <-- add this to reference export endpoints
+from api.views import home
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -28,16 +20,25 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # JWT endpoints!
+    # JWT endpoints
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-    # Your API app endpoints (if you have them in a separate file)
+    # Your API app routes (routers, other endpoints)
     path('api/', include('api.urls')),
+
+    # Payslip export endpoints (unique names; no conflicts)
+    path('admin/payslips/<int:payslip_id>/pdf/', api.export_payslip_pdf_single, name='export_payslip_pdf_single'),
+    path('admin/payslips/employee/<int:employee_id>/pdf/', api.export_payslips_pdf_employee, name='export_payslips_pdf_employee'),
+    path('admin/payslips/<int:employee_id>/<str:period>/pdf/', api.export_payslip_pdf_by_period, name='export_payslip_pdf_by_period'),
+    path('admin/payslips/export/csv/', api.export_payslips_csv, name='export_payslips_csv'),
+    path('admin/payslips/export/excel/', api.export_payslips_excel, name='export_payslips_excel'),
+
+    # Root
     path('', home, name='home'),
 ]
 
-# Append static/media URLs ONLY AFTER defining urlpatterns
+# Serve media in DEBUG
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
