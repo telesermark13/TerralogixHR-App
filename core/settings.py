@@ -2,10 +2,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
-import pymysql   
+import pymysql
+from datetime import timedelta  # (you already used timedelta below)
 
 load_dotenv()
-pymysql.install_as_MySQLdb() 
+pymysql.install_as_MySQLdb()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -21,6 +23,13 @@ ALLOWED_HOSTS = [
     'terralogixhr-app-production.up.railway.app',
 ]
 
+# ✅ Needed for admin/forms/CSRf with HTTPS origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://terralogixcorp.com',
+    'https://www.terralogixcorp.com',
+    'https://terralogixhr-app-production.up.railway.app',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -31,10 +40,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'api',
+    'django_filters',  # ✅ you reference DjangoFilterBackend in REST_FRAMEWORK
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ serve collected static files reliably on Railway
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,10 +74,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# ONLY this, do NOT have two DATABASES!
+# ✅ Robust DATABASE_URL handling with persistent connections
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(
+        env='DATABASE_URL',
+        conn_max_age=600,        # keep connections open for perf
+        ssl_require=False,       # set True if your MySQL host requires SSL
+    )
 }
+
+if not DATABASES.get('default'):
+    # Fail fast with a clear message if env var is missing
+    raise RuntimeError(
+        "DATABASE_URL is not set. Example (MySQL): "
+        "mysql://USER:PASS@HOST:3306/DBNAME"
+    )
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -82,6 +104,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# ✅ WhiteNoise compression/manifest for cache-busting
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -103,8 +127,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-from datetime import timedelta
-
+# (Keeping your lifetimes as-is; consider reducing in production)
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=100*365),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=100*3650),
