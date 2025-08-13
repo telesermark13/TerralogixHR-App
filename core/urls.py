@@ -36,11 +36,11 @@ urlpatterns = [
         staff_member_required(api.export_payslip_pdf_single),
         name="export_payslip_pdf_single",
     ),
-    path(
-        "exports/payslips/employee/<int:employee_id>/pdf/",
-        staff_member_required(api.export_payslips_pdf_employee),
-        name="export_payslips_pdf_employee",
-    ),
+   path(
+    "exports/payslips/employee/<int:employee_id>/pdf/",
+    staff_member_required(api.export_payslip_pdf_single),  # Or the correct function
+    name="export_payslips_pdf_employee",
+),
     path(
         "exports/payslips/<int:employee_id>/<str:period>/pdf/",
         staff_member_required(api.export_payslip_pdf_by_period),

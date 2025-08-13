@@ -725,4 +725,26 @@ class EmployeePhotoUploadView(APIView):
 
         serializer = EmployeeSerializer(employee)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def export_payslips_pdf_employee(request, employee_id):
+    try:
+        employee = Employee.objects.get(pk=employee_id)
+    except Employee.DoesNotExist:
+        return Response({'error': 'Employee not found'}, status=404)
+
+    # Logic to generate the payslip PDF for the employee
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="payslip_{employee.full_name}.pdf"'
+
+    # Use the canvas or any PDF generation method here
+    p = canvas.Canvas(response, pagesize=A4)
+    p.drawString(100, 750, f"Payslip for {employee.full_name}")
+    # Add more logic to populate the payslip content
+
+    p.showPage()
+    p.save()
+
+    return response    
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
