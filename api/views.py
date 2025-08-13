@@ -663,4 +663,20 @@ def admin_demote_user(request, user_id):
     user.save()
     return Response({'status': 'User demoted successfully'})
 
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_reset_password(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+
+    new_password = request.data.get('new_password')
+    if not new_password:
+        return Response({'error': 'New password is required'}, status=400)
+
+    user.set_password(new_password)
+    user.save()
+    return Response({'status': 'Password reset successfully'})
+
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
