@@ -691,4 +691,20 @@ def export_payslips_csv(request):
         writer.writerow([payslip.employee.full_name, payslip.period_from, payslip.period_to, payslip.gross_pay, payslip.net_pay])
     return response
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_payslips_excel(request):
+    employee = Employee.objects.filter(user=request.user).first()
+    qs = Payslip.objects.filter(employee=employee)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Payslips"
+    ws.append(["Employee Name", "Period From", "Period To", "Gross Pay", "Net Pay"])  # Add your fields here
+    for payslip in qs:
+        ws.append([payslip.employee.full_name, payslip.period_from, payslip.period_to, payslip.gross_pay, payslip.net_pay])
+    resp = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    resp['Content-Disposition'] = 'attachment; filename=payslips_report.xlsx'
+    wb.save(resp)
+    return resp
+
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
