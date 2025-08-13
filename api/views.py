@@ -679,4 +679,16 @@ def admin_reset_password(request, user_id):
     user.save()
     return Response({'status': 'Password reset successfully'})
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_payslips_csv(request):
+    queryset = Payslip.objects.all()  # Example, you can filter as needed
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="payslips.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Employee Name', 'Period From', 'Period To', 'Gross Pay', 'Net Pay'])  # Add your fields
+    for payslip in queryset:
+        writer.writerow([payslip.employee.full_name, payslip.period_from, payslip.period_to, payslip.gross_pay, payslip.net_pay])
+    return response
+
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
