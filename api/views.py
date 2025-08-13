@@ -640,4 +640,11 @@ def export_payslip_pdf_single(request, payslip_id):
     p.showPage(); p.save()
     return response
 
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_list_users(request):
+    users = User.objects.all()  # Or add filters as needed
+    serializer = RegisterSerializer(users, many=True)
+    return Response(serializer.data)
+
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
