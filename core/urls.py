@@ -1,81 +1,67 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from django.contrib.auth import views as auth_views
-from .views import (
-    # --- Kept Views ---
-    hello_world, my_profile, register_user, change_password,
-    generate_attendance_qr, qr_attendance_checkin, time_in, time_out,
-    export_attendance_csv, export_attendance_excel, save_push_token, send_push_notification,
-    admin_dashboard_stats, attendance_trend, dashboard_stats,
-    admin_list_employees, admin_list_leaves, admin_decide_leave,
-    invite_user, accept_invite,
-    admin_create_payslip, export_payslip_pdf_single, # Kept for now, but should move to ViewSet
+"""
+URL configuration for core project.
 
-    # --- ViewSets and Generic Views ---
-    UserViewSet, EmployeeViewSet, PayrollViewSet, PayslipViewSet, AttendanceViewSet,
-    DepartmentViewSet, LeaveTypeViewSet, LeaveRequestViewSet,
-    AnnouncementViewSet, NotificationViewSet, AuditLogViewSet,
-    UserInvitationViewSet, AuditLogList
+The `urlpatterns` list routes URLs to views.
+https://docs.djangoproject.com/en/5.2/topics/http/urls/
+"""
+from django.contrib import admin
+from django.contrib.admin.views.decorators import staff_member_required
+from django.conf import settings
+from django.conf.urls.static import static
+from django.urls import path, include
+
+from api import views as api
+from api.views import home
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
 )
 
-router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'employees', EmployeeViewSet)
-router.register(r'payrolls', PayrollViewSet)
-router.register(r'payslips', PayslipViewSet)
-router.register(r'attendances', AttendanceViewSet, basename='attendances')
-router.register(r'departments', DepartmentViewSet)
-router.register(r'leave-types', LeaveTypeViewSet)
-router.register(r'leaves', LeaveRequestViewSet, basename='leaves')
-router.register(r'announcements', AnnouncementViewSet)
-router.register(r'notifications', NotificationViewSet, basename='notification')
-router.register(r'audit-logs', AuditLogViewSet, basename='auditlog')
-router.register(r'invitations', UserInvitationViewSet, basename='invitation')
-
 urlpatterns = [
-    # basics
-    path('hello/', hello_world),
-    path('profile/', my_profile),
-    path('register/', register_user),
-    path('change-password/', change_password),
+    # Django Admin
+    path("admin/", admin.site.urls),
 
-    # attendance
-    path('attendance/qr/', generate_attendance_qr),
-    path('attendance/qr/checkin/', qr_attendance_checkin),
-    path('attendance/time-in/', time_in),
-    path('attendance/time-out/', time_out),
-    path('attendance/export/csv/', export_attendance_csv),
-    path('attendance/export/excel/', export_attendance_excel),
+    # JWT Auth
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
 
-    # push
-    path('save-push-token/', save_push_token),
-    path('admin/send-push/', send_push_notification),
+    # App API routes
+    path("api/", include("api.urls")),
 
-    # admin stats & lists
-    path('admin/dashboard-stats/', admin_dashboard_stats),
-    path('admin/attendance-trend/', attendance_trend),
-    path('admin/dashboard-stats/summary/', dashboard_stats),
-    path('admin/employees/', admin_list_employees),
-    path('admin/leaves/', admin_list_leaves),
-    path('admin/leave/<int:pk>/decide/', admin_decide_leave),
-    
-    # invites
-    path('admin/invite-user/', invite_user),
-    path('accept-invite/', accept_invite),
+    # === Payslip export endpoints (moved away from /admin/) ===
+    path(
+        "exports/payslips/<int:payslip_id>/pdf/",
+        staff_member_required(api.export_payslip_pdf_single),
+        name="export_payslip_pdf_single",
+    ),
+    path(
+        "exports/payslips/employee/<int:employee_id>/pdf/",
+        staff_member_required(api.export_payslips_pdf_employee),
+        name="export_payslips_pdf_employee",
+    ),
+    path(
+        "exports/payslips/<int:employee_id>/<str:period>/pdf/",
+        staff_member_required(api.export_payslip_pdf_by_period),
+        name="export_payslip_pdf_by_period",
+    ),
+    path(
+        "exports/payslips/export/csv/",
+        staff_member_required(api.export_payslips_csv),
+        name="export_payslips_csv",
+    ),
+    path(
+        "exports/payslips/export/excel/",
+        staff_member_required(api.export_payslips_excel),
+        name="export_payslips_excel",
+    ),
+    # === End exports ===
 
-    # audit (CBV list kept)
-    path('audit-logs/', AuditLogList.as_view()),
-
-    # password reset flow
-    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-
-    # payslips (These should be moved to the PayslipViewSet as custom actions)
-    path('admin/create-payslip/', admin_create_payslip),
-    path('admin/payslips/<int:payslip_id>/pdf/', export_payslip_pdf_single),
-
-    # The router handles all the ViewSet URLs, including for users, employees, etc.
-    path('', include(router.urls)),
+    # Root
+    path("", home, name="home"),
 ]
+
+# Serve media in DEBUG
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
