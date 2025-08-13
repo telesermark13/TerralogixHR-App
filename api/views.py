@@ -707,4 +707,22 @@ def export_payslips_excel(request):
     wb.save(resp)
     return resp
 
+
+class EmployeePhotoUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        employee = Employee.objects.filter(user=request.user).first()
+        if not employee:
+            return Response({"error": "Employee not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        photo = request.FILES.get("photo")
+        if not photo:
+            return Response({"error": "No photo provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        employee.profile_photo.save(photo.name, photo)
+        employee.save()
+
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
