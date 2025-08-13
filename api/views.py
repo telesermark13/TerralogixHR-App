@@ -647,4 +647,20 @@ def admin_list_users(request):
     serializer = RegisterSerializer(users, many=True)
     return Response(serializer.data)
 
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_demote_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+
+    if not user.is_staff:
+        return Response({'error': 'User is not an admin'}, status=400)
+
+    user.is_staff = False
+    user.save()
+    return Response({'status': 'User demoted successfully'})
+
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
