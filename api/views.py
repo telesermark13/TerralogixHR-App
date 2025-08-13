@@ -747,4 +747,26 @@ def export_payslips_pdf_employee(request, employee_id):
     p.save()
 
     return response    
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def export_payslip_pdf_by_period(request, employee_id, period):
+    try:
+        employee = Employee.objects.get(pk=employee_id)
+    except Employee.DoesNotExist:
+        return Response({'error': 'Employee not found'}, status=404)
+
+    # Logic to generate the payslip PDF for the given employee and period
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="payslip_{employee.full_name}_{period}.pdf"'
+
+    p = canvas.Canvas(response, pagesize=A4)
+    p.drawString(100, 750, f"Payslip for {employee.full_name} for the period {period}")
+    # You can add more logic here to generate payslip content for the period
+
+    p.showPage()
+    p.save()
+
+    return response
+
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.
