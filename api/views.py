@@ -769,4 +769,137 @@ def export_payslip_pdf_by_period(request, employee_id, period):
 
     return response
 
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def export_payslip_pdf_single(request, payslip_id=None, employee_id=None):
+    try:
+        if payslip_id:
+            ps = Payslip.objects.select_related('employee').get(pk=payslip_id)
+        elif employee_id:
+            # Get latest payslip for employee
+            ps = Payslip.objects.filter(employee_id=employee_id).latest('period_to')
+        else:
+            return Response({'error': 'Missing identifier'}, status=400)
+    except Payslip.DoesNotExist:
+        return Response({'error': 'Payslip not found'}, status=404)
+
+    # Create HTTP response with PDF
+    response = HttpResponse(content_type='application/pdf')
+    filename = f"payslip_{ps.employee.full_name}_{ps.period_from}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    # Create PDF canvas
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+    
+    # ===== HEADER SECTION =====
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(width/2, height-50, "TERRALOGIX HR")
+    p.setFont("Helvetica-Bold", 14)
+    p.drawCentredString(width/2, height-80, "EMPLOYEE PAYSLIP")
+    
+    # ===== COMPANY & EMPLOYEE INFO =====
+    p.setFont("Helvetica", 10)
+    p.drawString(50, height-110, f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M')}")
+    p.drawString(width-200, height-110, "Terralogix Inc.")
+    
+    # Employee info box
+    p.rect(50, height-180, width-100, 60)
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(60, height-140, "EMPLOYEE INFORMATION")
+    p.setFont("Helvetica", 10)
+    
+    employee_info = [
+        ("Name:", ps.name_snapshot or ps.employee.full_name),
+        ("ID No:", ps.employee_id_no or "N/A"),
+        ("Position:", ps.position_snapshot or ps.employee.position or "N/A"),
+        ("Department:", ps.employee.department.name if ps.employee.department else "N/A")
+    ]
+    
+    y_pos = height-160
+    for label, value in employee_info:
+        p.drawString(60, y_pos, label)
+        p.drawString(120, y_pos, value)
+        y_pos -= 20
+
+    # ===== PAY PERIOD SECTION =====
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, height-250, "PAY PERIOD")
+    p.setFont("Helvetica", 10)
+    p.drawString(50, height-270, f"From: {ps.period_from}")
+    p.drawString(200, height-270, f"To: {ps.period_to}")
+    p.drawString(350, height-270, f"Pay Date: {ps.issued_date}")
+
+    # ===== EARNINGS SECTION =====
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, height-310, "EARNINGS")
+    p.setFont("Helvetica", 10)
+    
+    earnings = [
+        ("Basic Salary", f"{ps.daily_rate} × {ps.days_worked} days", ps.daily_rate * ps.days_worked),
+        ("Overtime Pay", "", ps.overtime_pay),
+        ("Allowance", "", ps.allowance),
+        ("Holiday Pay", f"{ps.regular_holidays} days", 0),  # Add actual calculation if available
+    ]
+    
+    y_pos = height-330
+    for item, description, amount in earnings:
+        p.drawString(60, y_pos, item)
+        p.drawString(200, y_pos, description)
+        p.drawString(450, y_pos, f"₱{amount:,.2f}")
+        y_pos -= 20
+    
+    # Gross Pay
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(400, y_pos-10, "--------------")
+    p.drawString(60, y_pos-30, "GROSS PAY")
+    p.drawString(450, y_pos-30, f"₱{ps.gross_pay:,.2f}")
+    p.drawString(400, y_pos-40, "==============")
+
+    # ===== DEDUCTIONS SECTION =====
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y_pos-70, "DEDUCTIONS")
+    p.setFont("Helvetica", 10)
+    
+    deductions = [
+        ("Late/Undertime", "", ps.late_undertime),
+        ("SSS Contribution", "", ps.sss),
+        ("SSS Loan", "", ps.sss_loan),
+        ("HDMF Contribution", "", ps.hdmf),
+        ("HDMF Loan", "", ps.hdmf_loan),
+        ("PHIC Contribution", "", ps.phic),
+        ("Withholding Tax", "", ps.tax),
+        ("Cash Advance", "", ps.cash_advance),
+    ]
+    
+    y_pos -= 90
+    for item, description, amount in deductions:
+        p.drawString(60, y_pos, item)
+        p.drawString(450, y_pos, f"₱{amount:,.2f}")
+        y_pos -= 20
+
+    # Total Deductions
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(400, y_pos-10, "--------------")
+    p.drawString(60, y_pos-30, "TOTAL DEDUCTIONS")
+    p.drawString(450, y_pos-30, f"₱{ps.total_deductions:,.2f}")
+    p.drawString(400, y_pos-40, "==============")
+
+    # ===== NET PAY SECTION =====
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(60, y_pos-70, "NET PAY")
+    p.drawString(450, y_pos-70, f"₱{ps.net_pay:,.2f}")
+    p.setLineWidth(2)
+    p.line(60, y_pos-75, 500, y_pos-75)
+
+    # ===== FOOTER =====
+    p.setFont("Helvetica", 8)
+    p.drawCentredString(width/2, 50, "This is a computer-generated document and does not require a signature")
+    p.drawCentredString(width/2, 35, "Terralogix HR System | https://terralogixhr.com")
+
+    # Finalize PDF
+    p.showPage()
+    p.save()
+    return response
 # (Optional) All-payslips-for-employee and by-period endpoints can stay as in your file if you need them.

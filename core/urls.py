@@ -42,11 +42,10 @@ urlpatterns = [
     name="export_payslips_pdf_employee",
 ),
 path(
-    "exports/payslips/<int:employee_id>/<str:period>/pdf/",
-    #staff_member_required(api.export_payslip_pdf_by_period),  # Remove or comment out this line
-    name="export_payslip_pdf_by_period",
+    "exports/payslips/employee/<int:employee_id>/pdf/",
+    staff_member_required(api.export_payslip_pdf_single),  # Use existing view
+    name="export_payslips_pdf_employee",
 ),
-
     path(
         "exports/payslips/export/csv/",
         staff_member_required(api.export_payslips_csv),
