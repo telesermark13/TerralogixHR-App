@@ -7,7 +7,7 @@ from .views import (
     export_attendance_csv, export_attendance_excel, save_push_token, send_push_notification,
     admin_dashboard_stats, attendance_trend, dashboard_stats,
     admin_list_employees, admin_list_leaves, admin_decide_leave,
-    admin_demote_user, admin_reset_password, # The problematic 'admin_list_users' is removed from this line
+    # 'admin_demote_user' and 'admin_reset_password' are removed from this line
     invite_user, accept_invite,
     admin_create_payslip, export_payslips_csv, export_payslips_excel, export_payslip_pdf_single,
     EmployeePhotoUploadView,
@@ -57,9 +57,9 @@ urlpatterns = [
     path('admin/employees/', admin_list_employees),
     path('admin/leaves/', admin_list_leaves),
     path('admin/leave/<int:pk>/decide/', admin_decide_leave),
-    # The problematic path('admin/users/', admin_list_users) has been removed from here
-    path('admin/users/<int:user_id>/demote/', admin_demote_user),
-    path('admin/users/<int:user_id>/reset_password/', admin_reset_password),
+    # The following two lines have been removed as they are handled by UserViewSet
+    # path('admin/users/<int:user_id>/demote/', admin_demote_user),
+    # path('admin/users/<int:user_id>/reset_password/', admin_reset_password),
 
     # invites
     path('admin/invite-user/', invite_user),
