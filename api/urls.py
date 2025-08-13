@@ -4,16 +4,17 @@ from django.contrib.auth import views as auth_views
 from .views import (
     hello_world, my_profile, register_user, change_password,
     generate_attendance_qr, qr_attendance_checkin, time_in, time_out,
-    export_attendance_csv, export_attendance_excel, save_push_token,
-    admin_dashboard_stats, attendance_trend, admin_list_employees, admin_list_leaves,
-    admin_decide_leave, admin_list_users, admin_demote_user, admin_reset_password,
-    invite_user, accept_invite, admin_create_payslip, export_payslips_csv,
-    export_payslip_pdf_single, export_payslip_pdf_employee, export_payslip_pdf_by_period,
-    export_payslips_excel, EmployeePhotoUploadView, send_push_notification,
-    employee_photo_upload, UserViewSet, EmployeeViewSet, PayrollViewSet, PayslipViewSet,
-    AttendanceViewSet, DepartmentViewSet, LeaveTypeViewSet, LeaveRequestViewSet,
-    AnnouncementViewSet, AuditLogList, NotificationViewSet, AuditLogViewSet,
-    UserInvitationViewSet, PushTokenViewSet, dashboard_stats
+    export_attendance_csv, export_attendance_excel, save_push_token, send_push_notification,
+    admin_dashboard_stats, attendance_trend, dashboard_stats,
+    admin_list_employees, admin_list_leaves, admin_decide_leave,
+    admin_list_users, admin_demote_user, admin_reset_password,
+    invite_user, accept_invite,
+    admin_create_payslip, export_payslips_csv, export_payslips_excel, export_payslip_pdf_single,
+    EmployeePhotoUploadView,
+    UserViewSet, EmployeeViewSet, PayrollViewSet, PayslipViewSet, AttendanceViewSet,
+    DepartmentViewSet, LeaveTypeViewSet, LeaveRequestViewSet,
+    AnnouncementViewSet, NotificationViewSet, AuditLogViewSet,
+    UserInvitationViewSet, AuditLogList
 )
 
 router = DefaultRouter()
@@ -29,65 +30,58 @@ router.register(r'announcements', AnnouncementViewSet)
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'audit-logs', AuditLogViewSet, basename='auditlog')
 router.register(r'invitations', UserInvitationViewSet, basename='invitation')
-router.register(r'push-tokens', PushTokenViewSet, basename='pushtoken')
 
 urlpatterns = [
-    path('hello/', hello_world, name='hello'),
-    path('profile/', my_profile, name='profile'),
-    path('register/', register_user, name='register'),
-    path('change-password/', change_password, name='change-password'),
+    # basics
+    path('hello/', hello_world),
+    path('profile/', my_profile),
+    path('register/', register_user),
+    path('change-password/', change_password),
 
-    # Attendance
-    path('attendance/qr/', generate_attendance_qr, name='attendance-generate-qr'),
-    path('attendance/qr/checkin/', qr_attendance_checkin, name='attendance-qr-checkin'),
-    path('attendance/time-in/', time_in, name='attendance-time-in'),
-    path('attendance/time-out/', time_out, name='attendance-time-out'),
-    path('attendance/export/csv/', export_attendance_csv, name='attendance-export-csv'),
-    path('attendance/export/excel/', export_attendance_excel, name='attendance-export-excel'),
+    # attendance
+    path('attendance/qr/', generate_attendance_qr),
+    path('attendance/qr/checkin/', qr_attendance_checkin),
+    path('attendance/time-in/', time_in),
+    path('attendance/time-out/', time_out),
+    path('attendance/export/csv/', export_attendance_csv),
+    path('attendance/export/excel/', export_attendance_excel),
 
-    # Push notifications
-    path('save-push-token/', save_push_token, name='save-push-token'),
-    path('admin/send-push/', send_push_notification, name='send-push'),
+    # push
+    path('save-push-token/', save_push_token),
+    path('admin/send-push/', send_push_notification),
 
-    # Admin stats & lists
-    path('admin/dashboard-stats/', admin_dashboard_stats, name='admin-dashboard-stats'),
-    path('admin/attendance-trend/', attendance_trend, name='attendance-trend'),
-    path('admin/employees/', admin_list_employees, name='admin-list-employees'),
-    path('admin/leaves/', admin_list_leaves, name='admin-list-leaves'),
-    path('admin/leave/<int:pk>/decide/', admin_decide_leave, name='admin-decide-leave'),
-    path('admin/users/', admin_list_users, name='admin-list-users'),
-    path('admin/users/<int:user_id>/demote/', admin_demote_user, name='admin-demote-user'),
-    path('admin/users/<int:user_id>/reset_password/', admin_reset_password, name='admin-reset-password'),
+    # admin stats & lists
+    path('admin/dashboard-stats/', admin_dashboard_stats),
+    path('admin/attendance-trend/', attendance_trend),
+    path('admin/dashboard-stats/summary/', dashboard_stats),
+    path('admin/employees/', admin_list_employees),
+    path('admin/leaves/', admin_list_leaves),
+    path('admin/leave/<int:pk>/decide/', admin_decide_leave),
+    path('admin/users/', admin_list_users),
+    path('admin/users/<int:user_id>/demote/', admin_demote_user),
+    path('admin/users/<int:user_id>/reset_password/', admin_reset_password),
 
-    # Invitations
-    path('admin/invite-user/', invite_user, name='invite-user'),
-    path('accept-invite/', accept_invite, name='accept-invite'),
+    # invites
+    path('admin/invite-user/', invite_user),
+    path('accept-invite/', accept_invite),
 
-    # Audit logs
-    path('audit-logs/', AuditLogList.as_view(), name='auditlog-list'),
+    # audit (CBV list kept)
+    path('audit-logs/', AuditLogList.as_view()),
 
-    # Auth password reset
+    # password reset flow
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-    # Employee photo upload
-    path('employees/<int:pk>/upload_photo/', employee_photo_upload, name='employee-photo-upload'),
-    path('employees/<int:pk>/upload_photo/class/', EmployeePhotoUploadView.as_view(), name='employee-photo-upload-class'),
+    # employee photo (class endpoint)
+    path('employees/<int:pk>/upload_photo/class/', EmployeePhotoUploadView.as_view()),
 
-    # Payslip exports
-    path('admin/payslips/export/csv/', export_payslips_csv, name='export-payslips-csv'),
-    path('admin/payslips/export/excel/', export_payslips_excel, name='export-payslips-excel'),
-    path('admin/payslips/<int:payslip_id>/pdf/', export_payslip_pdf_single, name='export-payslip-pdf-single'),
-    path('admin/payslips/employee/<int:employee_id>/pdf/', export_payslip_pdf_employee, name='export-payslip-pdf-employee'),
-    path('admin/payslips/employee/<int:employee_id>/<str:period>/pdf/', export_payslip_pdf_by_period, name='export-payslip-pdf-by-period'),
-
-    # Create payslip
-    path('admin/create-payslip/', admin_create_payslip, name='admin-create-payslip'),
-
-    # Dashboard stats (duplicate removed; keeping one)
-    path('admin/dashboard-stats/summary/', dashboard_stats, name='dashboard-stats-summary'),
+    # payslips
+    path('admin/create-payslip/', admin_create_payslip),
+    path('admin/payslips/export/csv/', export_payslips_csv),
+    path('admin/payslips/export/excel/', export_payslips_excel),
+    path('admin/payslips/<int:payslip_id>/pdf/', export_payslip_pdf_single),
 
     path('', include(router.urls)),
 ]
