@@ -7,9 +7,8 @@ from .views import (
     export_attendance_csv, export_attendance_excel, save_push_token, send_push_notification,
     admin_dashboard_stats, attendance_trend, dashboard_stats,
     admin_list_employees, admin_list_leaves, admin_decide_leave,
-    # 'admin_demote_user' and 'admin_reset_password' are removed from this line
     invite_user, accept_invite,
-    admin_create_payslip, export_payslips_csv, export_payslips_excel, export_payslip_pdf_single,
+    # All payslip-related function imports are removed from here
     EmployeePhotoUploadView,
     UserViewSet, EmployeeViewSet, PayrollViewSet, PayslipViewSet, AttendanceViewSet,
     DepartmentViewSet, LeaveTypeViewSet, LeaveRequestViewSet,
@@ -57,9 +56,6 @@ urlpatterns = [
     path('admin/employees/', admin_list_employees),
     path('admin/leaves/', admin_list_leaves),
     path('admin/leave/<int:pk>/decide/', admin_decide_leave),
-    # The following two lines have been removed as they are handled by UserViewSet
-    # path('admin/users/<int:user_id>/demote/', admin_demote_user),
-    # path('admin/users/<int:user_id>/reset_password/', admin_reset_password),
 
     # invites
     path('admin/invite-user/', invite_user),
@@ -77,11 +73,8 @@ urlpatterns = [
     # employee photo (class endpoint)
     path('employees/<int:pk>/upload_photo/class/', EmployeePhotoUploadView.as_view()),
 
-    # payslips
-    path('admin/create-payslip/', admin_create_payslip),
-    path('admin/payslips/export/csv/', export_payslips_csv),
-    path('admin/payslips/export/excel/', export_payslips_excel),
-    path('admin/payslips/<int:payslip_id>/pdf/', export_payslip_pdf_single),
+    # The entire block of old payslip URLs has been removed from here.
+    # These actions are now handled by the PayslipViewSet.
 
     path('', include(router.urls)),
 ]
