@@ -15,6 +15,7 @@ ALLOWED_HOSTS = [
     'terralogixcorp.com',
     'www.terralogixcorp.com',
     'localhost',
+    'localhost:8000',
     '127.0.0.1',
     'terralogixhr-app.onrender.com',
     '.onrender.com',
