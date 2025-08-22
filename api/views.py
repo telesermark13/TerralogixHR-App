@@ -30,7 +30,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
 from .utils import compute_payroll, send_expo_push, log_action
-from .permissions import IsHR
+from .permissions import IsAdmin, IsHR, IsEmployee
 
 from .models import (
     Employee, Payroll, Attendance, Payslip, Department, LeaveType, LeaveRequest,
@@ -82,10 +82,8 @@ class AuditLogList(generics.ListAPIView):
     permission_classes = [IsAdminUser]
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdmin])
 def admin_list_leaves(request):
-    if not request.user.is_staff:
-        return Response({'error': 'Forbidden'}, status=403)
     leaves = LeaveRequest.objects.all().order_by('-date_requested')
     serializer = LeaveRequestSerializer(leaves, many=True)
     return Response(serializer.data)
@@ -143,10 +141,8 @@ def change_password(request):
 
 # --- Push Notification (server → Expo) ---
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdmin])
 def send_push_notification(request):
-    if not request.user.is_staff:
-        return Response({'error': 'Forbidden'}, status=403)
     user_id = request.data.get('user_id')
     title = request.data.get('title', 'Notification')
     body = request.data.get('body', '')
@@ -354,7 +350,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         u = self.request.user
-        return Employee.objects.all() if (u.is_staff or u.is_superuser) else Employee.objects.filter(user=u)
+        if u.groups.filter(name='Admin').exists() or u.groups.filter(name='HR').exists():
+            return Employee.objects.all()
+        return Employee.objects.filter(user=u)
 
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated], url_path='upload-photo')
     def upload_photo(self, request, pk=None):
@@ -377,7 +375,9 @@ class PayrollViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         u = self.request.user
-        return Payroll.objects.all() if (u.is_staff or u.is_superuser) else Payroll.objects.filter(employee__user=u)
+        if u.groups.filter(name='Admin').exists() or u.groups.filter(name='HR').exists():
+            return Payroll.objects.all()
+        return Payroll.objects.filter(employee__user=u)
 
 class PayslipViewSet(viewsets.ModelViewSet):
     queryset = Payslip.objects.all()
@@ -390,7 +390,9 @@ class PayslipViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         u = self.request.user
-        return Payslip.objects.all() if (u.is_staff or u.is_superuser) else Payslip.objects.filter(employee__user=u)
+        if u.groups.filter(name='Admin').exists() or u.groups.filter(name='HR').exists():
+            return Payslip.objects.all()
+        return Payslip.objects.filter(employee__user=u)
 
 class AttendanceViewSet(viewsets.ModelViewSet):
     queryset = Attendance.objects.all()
@@ -408,7 +410,7 @@ class AttendanceViewSet(viewsets.ModelViewSet):
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdmin]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
     ordering_fields = ['name']
@@ -434,12 +436,12 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         u = self.request.user
-        if u.is_staff or u.is_superuser:
+        if u.groups.filter(name='Admin').exists() or u.groups.filter(name='HR').exists():
             return LeaveRequest.objects.all()
         emp = Employee.objects.filter(user=u).first()
         return LeaveRequest.objects.filter(employee=emp)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    @action(detail=True, methods=['post'], permission_classes=[IsHR])
     def approve(self, request, pk=None):
         leave = self.get_object()
         if leave.status != 'Pending':
@@ -450,7 +452,7 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
         leave.save()
         return Response({'status': 'approved'})
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    @action(detail=True, methods=['post'], permission_classes=[IsHR])
     def reject(self, request, pk=None):
         leave = self.get_object()
         if leave.status != 'Pending':
@@ -501,7 +503,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
 class UserInvitationViewSet(viewsets.ModelViewSet):
     queryset = UserInvitation.objects.all()
     serializer_class = UserInvitationSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsAdmin]
     filter_backends = [filters.SearchFilter]
     search_fields = ['email']
 

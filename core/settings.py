@@ -11,8 +11,13 @@ pymysql.install_as_MySQLdb()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+# Make sure the DEBUG environment variable is set to "False" in your production environment.
 DEBUG = os.getenv("DEBUG", "False").lower() in ["true", "1", "t"]
 
+# SECURITY WARNING: define a more specific list of allowed hosts in production.
+# Using a wildcard character is not recommended.
 ALLOWED_HOSTS = [
     "terralogixcorp.com",
     "www.terralogixcorp.com",

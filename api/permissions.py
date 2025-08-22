@@ -1,27 +1,22 @@
-# permissions.py
 from rest_framework.permissions import BasePermission
 
-class IsManager(BasePermission):
+class IsAdmin(BasePermission):
     """
-    Allows access only to authenticated users with role 'manager'.
+    Allows access only to admin users.
     """
     def has_permission(self, request, view):
-        return (
-            request.user
-            and request.user.is_authenticated
-            and hasattr(request.user, 'employee')
-            and getattr(request.user.employee, 'role', '').lower() == 'manager'
-        )
-
+        return request.user and request.user.groups.filter(name='Admin').exists()
 
 class IsHR(BasePermission):
     """
-    Allows access only to authenticated users with role 'hr'.
+    Allows access only to HR users.
     """
     def has_permission(self, request, view):
-        return (
-            request.user
-            and request.user.is_authenticated
-            and hasattr(request.user, 'employee')
-            and getattr(request.user.employee, 'role', '').lower() == 'hr'
-        )
+        return request.user and request.user.groups.filter(name='HR').exists()
+
+class IsEmployee(BasePermission):
+    """
+    Allows access only to employee users.
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.groups.filter(name='Employee').exists()
