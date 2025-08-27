@@ -123,6 +123,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://terralogixcorp.com",
     "https://www.terralogixcorp.com",
     "https://terralogixhr-app-production.up.railway.app",
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://localhost:19006",
 ]
 CORS_ALLOW_CREDENTIALS = True
 # Remove the wildcard if present:

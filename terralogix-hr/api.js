@@ -4,7 +4,8 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 /** Base URLs */
-export const API_BASE = "https://terralogixhr-app-production.up.railway.app";
+/** Base URLs */
+export const API_BASE = "http://127.0.0.1:8000";
 export const BASE_URL = `${API_BASE}/api/`;
 
 /* ------------------------------------------------
