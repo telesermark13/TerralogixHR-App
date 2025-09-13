@@ -8,6 +8,7 @@ PyMySQL==1.1.0
 python-dotenv==1.1.1
 whitenoise==6.7.0
 gunicorn==23.0.0
+psycopg2-binary
 
 # keep these three to satisfy any legacy DRF schema imports, just in case
 coreapi==2.3.3
