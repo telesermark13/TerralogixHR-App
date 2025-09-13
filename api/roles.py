@@ -42,16 +42,33 @@ def setup_roles_and_permissions(apps, schema_editor):
     Create roles (groups) and assign permissions to them.
     This function can be called in a data migration.
     """
+    Group = apps.get_model('auth', 'Group')
+    Permission = apps.get_model('auth', 'Permission')
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+
     for role_name, permissions in ROLE_PERMISSIONS.items():
         group, created = Group.objects.get_or_create(name=role_name)
         if created:
             print(f"Created group: {role_name}")
 
         for codename, name in permissions:
-            # Create permission
-            # You might want to associate permissions with a specific model
-            # For simplicity, we'll use a generic content type here
-            content_type = ContentType.objects.get_for_model(Permission)
+            # Extract model name from codename
+            try:
+                model_name = codename.split('_')[1]
+            except IndexError:
+                print(f"Could not extract model name from codename {codename}. Skipping.")
+                continue
+
+            # Get the model from the 'api' app
+            try:
+                model = apps.get_model('api', model_name)
+            except LookupError:
+                print(f"Model {model_name} not found in app 'api'. Skipping permission {name}.")
+                continue
+
+            # Get content type for the model
+            content_type = ContentType.objects.get_for_model(model)
+
             permission, perm_created = Permission.objects.get_or_create(
                 codename=codename,
                 name=name,

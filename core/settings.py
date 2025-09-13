@@ -2,11 +2,9 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
-import pymysql
 from datetime import timedelta
 
 load_dotenv()
-pymysql.install_as_MySQLdb()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -79,17 +77,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-# Database (MySQL via dj_database_url)
+# Database (PostgreSQL or MySQL via dj_database_url)
 DATABASES = {
     "default": dj_database_url.config(
         env="DATABASE_URL",
         conn_max_age=600,
-        ssl_require=False,  # set True if your host requires SSL
+        ssl_require=not DEBUG,  # True in production (Postgres), False locally (MySQL)
     )
 }
 if not DATABASES.get("default"):
     raise RuntimeError(
-        "DATABASE_URL is not set. Example (MySQL): mysql://USER:PASS@HOST:3306/DBNAME"
+        "DATABASE_URL is not set. Example: "
+        "postgresql://USER:PASS@HOST:5432/DBNAME"
     )
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -112,9 +111,7 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
     },
-    
 }
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
