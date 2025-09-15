@@ -18,7 +18,6 @@ uritemplate==4.1.1
 # PDF / reporting stack (choose ONE main engine)
 reportlab==4.2.5
 weasyprint==62.3
-xhtml2pdf==0.2.17
 
 # Supporting libs with wheels pinned
 arabic-reshaper==3.0.0
@@ -50,7 +49,6 @@ pyhanko-certvalidator==0.27.0
 PyJWT==2.9.0
 pypdf==4.3.0
 pyphen==0.14.0
-python-bidi==0.5.0
 python-dateutil==2.9.0.post0
 pytz==2024.1
 PyYAML==6.0.1

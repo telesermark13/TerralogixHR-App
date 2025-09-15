@@ -25,7 +25,6 @@ import os
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from xhtml2pdf import pisa
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
