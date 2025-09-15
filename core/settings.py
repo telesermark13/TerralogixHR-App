@@ -22,7 +22,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "terralogixhr-app.onrender.com",
-    ".onrender.com",
+    "terralogixhr-app-lm43.onrender.com",
     "terralogixhr-app-production.up.railway.app",
 ]
 
