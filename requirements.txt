@@ -60,7 +60,7 @@ six==1.16.0
 sqlparse==0.5.1
 svglib==1.5.1
 tinycss2==1.2.1
-tinyhtml5==1.0.0
+tinyhtml5==2.0.0
 tzdata==2024.1
 tzlocal==5.2
 uritools==4.0.2
