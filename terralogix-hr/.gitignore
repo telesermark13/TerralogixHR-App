@@ -27,3 +27,10 @@ expo-env.d.ts
 
 # typescript
 *.tsbuildinfo
+
+# Android
+/android/app/build/
+/android/build/
+/android/.gradle/
+/android/app/.cxx/
+/android/app/src/main/jni/prebuilt/

@@ -1,0 +1,18 @@
+{
+  "files.exclude": {
+    "android": true,
+    "ios": true,
+    "node_modules": true,
+    "**/.gradle": true,
+    "**/.project": true,
+    "**/.classpath": true
+  },
+  "search.exclude": {
+    "node_modules": true
+  },
+  "java.configuration.excludeFolders": [
+    "node_modules",
+    "android",
+    "ios"
+  ]
+}
