@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "708943841257",
+    "project_id": "terrahr-app",
+    "storage_bucket": "terrahr-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708943841257:android:94d5771bfaf9eb815ead78",
+        "android_client_info": {
+          "package_name": "com.terralogix.hr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ7Z5h0JM8eu0LluTRuXtlzEW1qeLaWJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -17,7 +17,8 @@
       "android": { "buildType": "apk" },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://terralogixhr-app-production.up.railway.app"
+        "EXPO_PUBLIC_API_BASE_URL": "https://terralogixhr-app-production.up.railway.app",
+        "GOOGLE_SERVICES_JSON": "@google-services.json"
       }
     },
     "production": {
