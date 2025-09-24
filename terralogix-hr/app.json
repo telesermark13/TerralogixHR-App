@@ -31,7 +31,7 @@
 
     "android": {
       "package": "com.terralogix.hr",
-      "googleServicesFile": "./google-services.json",
+  "googleServicesFile": "${GOOGLE_SERVICES_JSON}",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
