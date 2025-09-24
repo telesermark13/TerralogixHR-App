@@ -1,5 +1,5 @@
-const { getSentryExpoConfig } = require("@sentry/react-native/metro");
-
-const config = getSentryExpoConfig(__dirname);
-
-module.exports = config;
+module.exports = {
+	transformer: {
+		babelTransformerPath: require.resolve("expo/metro-config")
+	}
+};
