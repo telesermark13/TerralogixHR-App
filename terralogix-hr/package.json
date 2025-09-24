@@ -60,6 +60,7 @@
     "@babel/plugin-transform-class-properties": "^7.27.1",
     "@babel/plugin-transform-private-methods": "^7.27.1",
     "@babel/plugin-transform-private-property-in-object": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@react-native-community/cli": "^19.1.1",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^12.5.0",
