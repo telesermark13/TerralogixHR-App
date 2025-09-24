@@ -53,3 +53,5 @@ overrides: [
 `);
   }
 );
+
+// (No shell commands should be present in this JS file)
