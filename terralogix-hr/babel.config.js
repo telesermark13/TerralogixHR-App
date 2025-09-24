@@ -3,8 +3,17 @@ module.exports = function (api) {
   return {
     presets: [
       "babel-preset-expo",
-      "@babel/preset-typescript"
+      "@babel/preset-typescript",
     ],
-    plugins: []
+    overrides: [
+      {
+        test: [
+          "./node_modules/**/*.ts",
+          "./node_modules/**/*.tsx",
+        ],
+        presets: ["@babel/preset-typescript"],
+      },
+    ],
+    plugins: [],
   };
 };
