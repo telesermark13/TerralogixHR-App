@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@sentry/react-native": "^7.1.0",
     "expo": "^54.0.10",
     "react-native": "^0.80.2"
   }

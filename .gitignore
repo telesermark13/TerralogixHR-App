@@ -10,3 +10,4 @@ db.sqlite3
 *.DS_Store
 .ssh/
 venv310/
+.env.local
