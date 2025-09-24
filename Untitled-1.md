@@ -1,0 +1,1 @@
+"main": "terralogix-hr/App.js"

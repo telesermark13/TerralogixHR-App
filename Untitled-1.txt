@@ -1,0 +1,6 @@
+rmdir /s /q node_modules .expo .expo-shared
+del package-lock.json
+npm install
+
+The development server returned response error code: 500
+Error: The module ./App could not be resolved because none of these files exist: .../App(.native|.android.js|.js|.native.json|.android.json|.json)
