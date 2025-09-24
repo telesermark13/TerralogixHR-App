@@ -24,7 +24,7 @@
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
-    "@sentry/react-native": "^7.1.0",
+    "@sentry/react-native": "~6.20.0",
     "expo": "^54.0.10",
     "expo-build-properties": "~1.0.9",
     "expo-dev-client": "~6.0.12",
