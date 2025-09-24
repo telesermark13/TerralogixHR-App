@@ -6,7 +6,7 @@ Sentry.init({
   // You can add more options here
 });
 
-Sentry.captureException(new Error("Test Sentry error!"));
+Sentry.captureException(new Error('First error'));
 
 export default ({ config }) => ({
   ...config,
