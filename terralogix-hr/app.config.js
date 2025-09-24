@@ -1,12 +1,4 @@
-import 'dotenv/config';
-import * as Sentry from '@sentry/react-native';
 
-Sentry.init({
-  dsn: 'your-dsn-here',
-  // You can add more options here
-});
-
-Sentry.captureException(new Error('First error'));
 
 export default ({ config }) => ({
   ...config,
