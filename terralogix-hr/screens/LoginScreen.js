@@ -15,10 +15,16 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL, getProfile } from '../api';
+
+import { Alert as RNAlert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { registerForPushNotificationsAsync } from '../notifications';
 
 export default function LoginScreen({ navigation }) {
+  // Show BASE_URL on mount for debugging
+  useEffect(() => {
+    RNAlert.alert('API BASE_URL', BASE_URL);
+  }, []);
   const [username, setUsername] = useState(''); // email/username
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
