@@ -52,30 +52,9 @@ function normalizeBase(url) {
  * 2) If dev, auto-wire to your LAN IP (Django on :8000)
  * 3) Fallback to production Railway
  */
-const ENV_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ||
-  process.env.API_BASE_URL || // optional custom
-  "";
 
-let base = normalizeBase(ENV_URL);
-
-if (!base) {
-  if (__DEV__) {
-    const host = getDevHost();
-    if (host) {
-      base = normalizeBase(`http://${host}:8000`);
-    }
-  }
-}
-
-// Final fallback: your production API
-if (!base) {
-  // Default to the Render deployment so local/debug builds use the deployed API
-  base = normalizeBase("https://terralogixhr-app-lm43.onrender.com");
-}
-
-// Exported base URL (always ends with `/api/`)
-export const BASE_URL = base;
+// FORCE: Always use Render backend for all builds
+export const BASE_URL = "https://terralogixhr-app-lm43.onrender.com/api/";
 
 /**
  * Optional helper if you ever need to override at runtime.
