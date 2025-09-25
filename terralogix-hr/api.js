@@ -2,8 +2,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import Constants from "expo-constants";
 
-import { BASE_URL } from "./config";
+export const API_BASE_URL = Constants.expoConfig.extra.API_BASE_URL;
+
 
 /* ------------------------------------------------
    Helpers
@@ -30,7 +32,7 @@ export async function logout() {
 export async function refreshAccessToken() {
   const refresh = await AsyncStorage.getItem("refresh_token");
   if (!refresh) throw new Error("No refresh token");
-  const response = await fetch(`${BASE_URL}token/refresh/`, {
+  const response = await fetch(`${API_BASE_URL}/token/refresh/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refresh }),
@@ -77,7 +79,7 @@ export async function fetchWithAuth(url, options = {}) {
 -------------------------------------------------*/
 
 export async function login(username, password) {
-  const response = await fetch(`${BASE_URL}token/`, {
+  const response = await fetch(`${API_BASE_URL}/token/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -92,21 +94,21 @@ export async function login(username, password) {
 
 /** Get the authenticated user profile (expect a single object) */
 export async function getProfile() {
-  return fetchWithAuth(`${BASE_URL}profile/`);
+  return fetchWithAuth(`${API_BASE_URL}/profile/`);
 }
 
 /** If you need the full employee list separately */
 export async function getEmployees() {
-  return fetchWithAuth(`${BASE_URL}employees/`);
+  return fetchWithAuth(`${API_BASE_URL}/employees/`);
 }
 
 export async function getEmployeeById(id) {
-  return fetchWithAuth(`${BASE_URL}employees/${id}/`);
+  return fetchWithAuth(`${API_BASE_URL}/employees/${id}/`);
 }
 
 export async function updateProfile(data) {
   // data: { id, full_name, email }  (PATCH /employees/:id/)
-  return fetchWithAuth(`${BASE_URL}employees/${data.id}/`, {
+  return fetchWithAuth(`${API_BASE_URL}/employees/${data.id}/`, {
     method: "PATCH",
     body: JSON.stringify({
       full_name: data.full_name,
@@ -124,7 +126,7 @@ export async function uploadProfilePhoto(photoAsset) {
     type: photoAsset.type || "image/jpeg",
   });
 
-  const res = await fetch(`${BASE_URL}employee/profile-photo/`, {
+  const res = await fetch(`${API_BASE_URL}/employee/profile-photo/`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
@@ -138,7 +140,7 @@ export async function uploadProfilePhoto(photoAsset) {
 
 /** User self-service change password */
 export async function changePassword(oldPassword, newPassword) {
-  return fetchWithAuth(`${BASE_URL}change-password/`, {
+  return fetchWithAuth(`${API_BASE_URL}/change-password/`, {
     method: "POST",
     body: JSON.stringify({
       old_password: oldPassword,
@@ -152,18 +154,18 @@ export async function changePassword(oldPassword, newPassword) {
 -------------------------------------------------*/
 
 export async function fetchAttendance() {
-  return fetchWithAuth(`${BASE_URL}attendances/`);
+  return fetchWithAuth(`${API_BASE_URL}/attendances/`);
 }
 
 export async function postTimeIn(location = {}) {
-  return fetchWithAuth(`${BASE_URL}attendance/time-in/`, {
+  return fetchWithAuth(`${API_BASE_URL}/attendance/time-in/`, {
     method: "POST",
     body: JSON.stringify(location),
   });
 }
 
 export async function postTimeOut(location = {}) {
-  return fetchWithAuth(`${BASE_URL}attendance/time-out/`, {
+  return fetchWithAuth(`${API_BASE_URL}/attendance/time-out/`, {
     method: "POST",
     body: JSON.stringify(location),
   });
@@ -194,7 +196,7 @@ export async function getAttendanceCache() {
 
 /** Admin: all attendance locations (for map) */
 export async function fetchAllAttendanceLocations() {
-  return fetchWithAuth(`${BASE_URL}attendance/all/`);
+  return fetchWithAuth(`${API_BASE_URL}/attendance/all/`);
 }
 
 /* ------------------------------------------------
@@ -202,18 +204,18 @@ export async function fetchAllAttendanceLocations() {
 -------------------------------------------------*/
 
 export async function getLeaves() {
-  return fetchWithAuth(`${BASE_URL}leaves/`);
+  return fetchWithAuth(`${API_BASE_URL}/leaves/`);
 }
 
 export async function getLeaveById(id) {
-  return fetchWithAuth(`${BASE_URL}leaves/${id}/`);
+  return fetchWithAuth(`${API_BASE_URL}/leaves/${id}/`);
 }
 
 /** Create leave using common shape used in your screens */
 export async function createLeave({ start_date, end_date, reason, employee }) {
   const payload = { start_date, end_date, reason };
   if (employee) payload.employee = employee;
-  return fetchWithAuth(`${BASE_URL}leaves/`, {
+  return fetchWithAuth(`${API_BASE_URL}/leaves/`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -241,11 +243,11 @@ export async function clearPendingLeave() {
 export async function getPayslips(params) {
   // Optional pagination support: pass { page: 1 } etc.
   const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-  return fetchWithAuth(`${BASE_URL}payslips/${qs}`);
+  return fetchWithAuth(`${API_BASE_URL}/payslips/${qs}`);
 }
 
 export async function getPayslipById(id) {
-  return fetchWithAuth(`${BASE_URL}payslips/${id}/`);
+  return fetchWithAuth(`${API_BASE_URL}/payslips/${id}/`);
 }
 
 export async function savePayslipCache(payslip) {
@@ -260,7 +262,7 @@ export async function getPayslipCache(id) {
 /** Admin exports */
 export async function exportPayslipFile(type = "csv") {
   const token = await AsyncStorage.getItem("access_token");
-  const url = `${BASE_URL}admin/payslips/export/${type}/`;
+  const url = `${API_BASE_URL}/admin/payslips/export/${type}/`;
   const ext = type === "excel" ? "xlsx" : "csv";
   const fileUri = FileSystem.cacheDirectory + `payslips_export.${ext}`;
   const res = await FileSystem.downloadAsync(url, fileUri, {
@@ -284,22 +286,22 @@ export async function sharePayslipFile(type = "csv") {
 -------------------------------------------------*/
 
 export async function getAnnouncements() {
-  return fetchWithAuth(`${BASE_URL}announcements/`);
+  return fetchWithAuth(`${API_BASE_URL}/announcements/`);
 }
 export async function createAnnouncement({ title, message }) {
-  return fetchWithAuth(`${BASE_URL}announcements/`, {
+  return fetchWithAuth(`${API_BASE_URL}/announcements/`, {
     method: "POST",
     body: JSON.stringify({ title, message }),
   });
 }
 export async function updateAnnouncement(id, { title, message }) {
-  return fetchWithAuth(`${BASE_URL}announcements/${id}/`, {
+  return fetchWithAuth(`${API_BASE_URL}/announcements/${id}/`, {
     method: "PATCH",
     body: JSON.stringify({ title, message }),
   });
 }
 export async function deleteAnnouncement(id) {
-  return fetchWithAuth(`${BASE_URL}announcements/${id}/`, { method: "DELETE" });
+  return fetchWithAuth(`${API_BASE_URL}/announcements/${id}/`, { method: "DELETE" });
 }
 
 /* ------------------------------------------------
@@ -317,17 +319,17 @@ export async function fetchPHHolidays(year = new Date().getFullYear()) {
 -------------------------------------------------*/
 
 export async function savePushToken(userId, expoPushToken) {
-  return fetchWithAuth(`${BASE_URL}save-push-token/`, {
+  return fetchWithAuth(`${API_BASE_URL}/save-push-token/`, {
     method: "POST",
     body: JSON.stringify({ user_id: userId, expo_push_token: expoPushToken }),
   });
 }
 
 export async function getNotifications() {
-  return fetchWithAuth(`${BASE_URL}notifications/`);
+  return fetchWithAuth(`${API_BASE_URL}/notifications/`);
 }
 export async function markNotificationRead(id) {
-  return fetchWithAuth(`${BASE_URL}notifications/${id}/read/`, { method: "POST" });
+  return fetchWithAuth(`${API_BASE_URL}/notifications/${id}/read/`, { method: "POST" });
 }
 
 /* ------------------------------------------------
@@ -335,28 +337,28 @@ export async function markNotificationRead(id) {
 -------------------------------------------------*/
 
 export async function fetchDashboardStats() {
-  return fetchWithAuth(`${BASE_URL}admin/dashboard-stats/`);
+  return fetchWithAuth(`${API_BASE_URL}/admin/dashboard-stats/`);
 }
 export async function fetchAllEmployees() {
-  return fetchWithAuth(`${BASE_URL}admin/employees/`);
+  return fetchWithAuth(`${API_BASE_URL}/admin/employees/`);
 }
 export async function fetchAllLeaves() {
-  return fetchWithAuth(`${BASE_URL}admin/leaves/`);
+  return fetchWithAuth(`${API_BASE_URL}/admin/leaves/`);
 }
 export async function decideLeave(leaveId, status, remarks = "") {
-  return fetchWithAuth(`${BASE_URL}admin/leave/${leaveId}/decide/`, {
+  return fetchWithAuth(`${API_BASE_URL}/admin/leave/${leaveId}/decide/`, {
     method: "POST",
     body: JSON.stringify({ status, remarks }),
   });
 }
 export async function changePasswordAdmin(new_password, old_password) {
-  return fetchWithAuth(`${BASE_URL}change-password/`, {
+  return fetchWithAuth(`${API_BASE_URL}/change-password/`, {
     method: "POST",
     body: JSON.stringify({ old_password, new_password }),
   });
 }
 export async function fetchAttendanceTrend() {
-  return fetchWithAuth(`${BASE_URL}admin/attendance-trend/`);
+  return fetchWithAuth(`${API_BASE_URL}/admin/attendance-trend/`);
 }
 
 /* ------------------------------------------------
@@ -365,7 +367,7 @@ export async function fetchAttendanceTrend() {
 
 export async function exportAttendanceFile(type = "csv") {
   const token = await AsyncStorage.getItem("access_token");
-  const url = `${BASE_URL}admin/attendance/export/?type=${type}`;
+  const url = `${API_BASE_URL}/admin/attendance/export/?type=${type}`;
   const ext = type === "excel" ? "xlsx" : "csv";
   const fileUri = FileSystem.cacheDirectory + `attendance_export.${ext}`;
   const res = await FileSystem.downloadAsync(url, fileUri, {

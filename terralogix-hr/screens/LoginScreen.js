@@ -14,17 +14,12 @@ import {
   Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL, getProfile } from '../api';
+import { login, getProfile } from '../api';
 
-import { Alert as RNAlert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { registerForPushNotificationsAsync } from '../notifications';
 
 export default function LoginScreen({ navigation }) {
-  // Show BASE_URL on mount for debugging
-  useEffect(() => {
-    RNAlert.alert('API BASE_URL', BASE_URL);
-  }, []);
   const [username, setUsername] = useState(''); // email/username
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -47,23 +42,7 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // Your Django JWT endpoint lives at /api/token/
-      const res = await fetch(`${BASE_URL}api/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p }),
-      });
-
-      if (!res.ok) {
-        let errorMsg = 'Invalid credentials';
-        try {
-          const errJson = await res.json();
-          errorMsg = errJson.detail || errJson.message || errorMsg;
-        } catch {}
-        throw new Error(errorMsg);
-      }
-
-      const data = await res.json();
+      const data = await login(u, p);
       if (!data?.access) {
         throw new Error('No access token returned by server.');
       }

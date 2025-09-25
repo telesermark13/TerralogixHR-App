@@ -54,7 +54,6 @@ function normalizeBase(url) {
  */
 
 // FORCE: Always use Render backend for all builds
-export const BASE_URL = "https://terralogixhr-app-lm43.onrender.com/api/";
 
 /**
  * Optional helper if you ever need to override at runtime.
@@ -76,5 +75,5 @@ export function setBaseURL(next) {
  */
 export function apiUrl(path = "") {
   const trimmed = String(path).replace(/^\/+/, "");
-  return `${BASE_URL}${trimmed}`;
+  return `${API_BASE_URL}${trimmed}`;
 }

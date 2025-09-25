@@ -26,6 +26,7 @@ export default ({ config }) => ({
     eas: {
       ...(config.extra?.eas || {}),
       projectId: "3dfa5117-d674-4045-8ab6-7f3d484ca0df"
-    }
+    },
+    API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || "https://terralogixhr-app-lm43.onrender.com/api"
   }
 });
