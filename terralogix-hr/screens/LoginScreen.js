@@ -96,7 +96,11 @@ export default function LoginScreen({ navigation }) {
       Keyboard.dismiss();
       navigation.replace('MainTabs');
     } catch (e) {
-      Alert.alert('Login failed', e?.message || 'Something went wrong.');
+      // Show full error for debugging
+      Alert.alert('Login failed', e?.message || String(e));
+      if (e && e.stack) {
+        Alert.alert('Debug info', e.stack);
+      }
     } finally {
       setLoading(false);
     }
