@@ -36,5 +36,42 @@
         "track": "production"
       }
     }
+  },
+  "android": {
+    "localProperties": {
+      "sdk.dir": "C:\\Users\\<your-username>\\AppData\\Local\\Android\\Sdk"
+    }
+  },
+  "scripts": {
+    "android": {
+      "build": "cd android && .\\gradlew assembleDebug"
+    }
+  },
+  "expo": {
+    "android": {
+      "package": "com.terralogixhr.app",
+      "versionCode": 1,
+      "permissions": [],
+      "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "https",
+            "host": "terralogixhr-app-production.up.railway.app",
+            "pathPrefix": "/"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }

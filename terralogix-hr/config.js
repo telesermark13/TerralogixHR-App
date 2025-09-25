@@ -70,7 +70,8 @@ if (!base) {
 
 // Final fallback: your production API
 if (!base) {
-  base = normalizeBase("https://terralogixhr-app-production.up.railway.app");
+  // Default to the Render deployment so local/debug builds use the deployed API
+  base = normalizeBase("https://terralogixhr-app-lm43.onrender.com");
 }
 
 // Exported base URL (always ends with `/api/`)
