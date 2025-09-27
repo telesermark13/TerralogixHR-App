@@ -43,6 +43,8 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       const data = await login(u, p);
+      console.log('Login response:', data);
+      Alert.alert('Login response', JSON.stringify(data));
       if (!data?.access) {
         throw new Error('No access token returned by server.');
       }
