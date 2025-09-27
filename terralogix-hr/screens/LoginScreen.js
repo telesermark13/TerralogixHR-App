@@ -1,5 +1,5 @@
 // screens/LoginScreen.js
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,24 +13,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login, getProfile } from '../api';
+import { useAuth } from '../AuthContext';
+
 
 import { Ionicons } from '@expo/vector-icons';
-import { registerForPushNotificationsAsync } from '../notifications';
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen() {
+  const { signIn } = useAuth();
   const [username, setUsername] = useState(''); // email/username
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const token = await AsyncStorage.getItem('access_token');
-      if (token) navigation.replace('MainTabs');
-    })();
-  }, [navigation]);
 
   const handleLogin = async () => {
     const u = username.trim();
@@ -42,46 +35,13 @@ export default function LoginScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const data = await login(u, p);
-      console.log('Login response:', data);
-      Alert.alert('Login response', JSON.stringify(data));
-      if (!data?.access) {
-        throw new Error('No access token returned by server.');
+      const { success, error } = await signIn(u, p);
+      if (!success) {
+        throw new Error(error || 'Login failed');
       }
-
-      // Store tokens ASAP so downstream API calls can auth
-      await AsyncStorage.setItem('access_token', data.access);
-      if (data.refresh) {
-        await AsyncStorage.setItem('refresh_token', data.refresh);
-      }
-
-      // Fetch user profile (doesn't block login if it fails)
-      try {
-        const profile = await getProfile();
-        if (profile) {
-          await AsyncStorage.setItem('profile', JSON.stringify(profile));
-          await AsyncStorage.setItem('is_staff', profile.is_staff ? '1' : '0');
-          // Register device for push (non-blocking)
-          try {
-            if (profile?.id) {
-              await registerForPushNotificationsAsync(profile.id);
-            }
-          } catch (e) {
-            console.warn('Push registration failed:', e?.message || e);
-          }
-        }
-      } catch (e) {
-        console.warn('Profile fetch failed:', e?.message || e);
-      }
-
-      Keyboard.dismiss();
-      navigation.replace('MainTabs');
+      // Navigation will be handled by RootNavigator
     } catch (e) {
-      // Show full error for debugging
       Alert.alert('Login failed', e?.message || String(e));
-      if (e && e.stack) {
-        Alert.alert('Debug info', e.stack);
-      }
     } finally {
       setLoading(false);
     }

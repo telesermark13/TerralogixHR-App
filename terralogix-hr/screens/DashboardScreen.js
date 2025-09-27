@@ -13,32 +13,26 @@ import {
 } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getEmployees, fetchAttendance, fetchPHHolidays } from "../api";
+import { getEmployees, fetchAttendance, fetchPHHolidays, getAnnouncements } from "../api";
 
 const CACHE_USER = "dash:user:v1";
 const CACHE_ATT = "dash:attendance:v1";
 const CACHE_HOLS = "dash:holidays:v1";
+const CACHE_ANNS = "dash:announcements:v1";
 const DATE_FMT_LOCALE = "en-PH";
 
 export default function DashboardScreen() {
   const [user, setUser] = useState(null);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [holidays, setHolidays] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
   const [offline, setOffline] = useState(false);
 
   const [loadingDash, setLoadingDash] = useState(true);
   const [loadingHolidays, setLoadingHolidays] = useState(true);
+  const [loadingAnnouncements, setLoadingAnnouncements] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
-
-  const announcements = useMemo(
-    () => [
-      "HR Meeting at 3PM today",
-      "Submit leave forms by Friday",
-      "Holiday on June 12 (Independence Day)",
-    ],
-    []
-  );
 
   // Monitor online/offline status with reachability
   useEffect(() => {
@@ -101,17 +95,37 @@ export default function DashboardScreen() {
     }
   }, []);
 
+    // ---- Load announcements with cache fallback ----
+  const loadAnnouncements = useCallback(async () => {
+    setLoadingAnnouncements(true);
+    try {
+      const data = await getAnnouncements();
+      const list = Array.isArray(data) ? data : [];
+      setAnnouncements(list);
+      await AsyncStorage.setItem(CACHE_ANNS, JSON.stringify(list));
+    } catch (err) {
+      setOffline(true);
+      const cached = await AsyncStorage.getItem(CACHE_ANNS);
+      if (cached) setAnnouncements(JSON.parse(cached));
+    } finally {
+      setLoadingAnnouncements(false);
+    }
+  }, []);
+
+
   // Initial load
   useEffect(() => {
     loadDashboard();
     loadHolidays();
-  }, [loadDashboard, loadHolidays]);
+    loadAnnouncements();
+  }, [loadDashboard, loadHolidays, loadAnnouncements]);
 
   // Pull-to-refresh both sections
   const onRefresh = async () => {
     setRefreshing(true);
     await loadDashboard(true);
     await loadHolidays();
+    await loadAnnouncements();
     setRefreshing(false);
   };
 
@@ -201,11 +215,18 @@ export default function DashboardScreen() {
       {/* Announcements */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>📢 Announcements</Text>
-        {announcements.map((msg, idx) => (
-          <Text style={styles.announcement} key={idx}>
-            • {msg}
-          </Text>
-        ))}
+        {loadingAnnouncements ? (
+          <ActivityIndicator color="#00BFFF" />
+        ) : announcements.length === 0 ? (
+          <Text style={styles.emptyText}>No announcements at this time.</Text>
+        ) : (
+          announcements.map((ann) => (
+            <View key={ann.id} style={{ marginBottom: 4 }}>
+              <Text style={styles.announcementTitle}>• {ann.title}</Text>
+              <Text style={styles.announcement}>{ann.message}</Text>
+            </View>
+          ))
+        )}
       </View>
 
       {/* Upcoming Holiday (highlight) */}
@@ -313,6 +334,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontWeight: "bold", fontSize: 16, marginBottom: 8, color: "#00BFFF" },
   announcement: { fontSize: 14, color: "#333", marginBottom: 2 },
+  announcementTitle: { fontSize: 14, color: "#333", marginBottom: 2, fontWeight: "bold" },
 
   attendanceRow: {
     flexDirection: "row",

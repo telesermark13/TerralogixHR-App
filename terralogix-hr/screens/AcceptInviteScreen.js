@@ -13,10 +13,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { useNavigation, useRoute } from "@react-navigation/native";
-
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://terralogixhr-app-production.up.railway.app";
+import { API_BASE_URL } from "../api";
 
 export default function AcceptInviteScreen() {
   const navigation = useNavigation();
@@ -50,12 +47,12 @@ export default function AcceptInviteScreen() {
     setLoading(true);
     try {
       const client = axios.create({
-        baseURL: API_BASE,
+        baseURL: API_BASE_URL,
         timeout: 15000,
         headers: { "Content-Type": "application/json" },
       });
 
-      await client.post("/api/accept-invite/", { token, password });
+      await client.post("/invitations/accept/", { token, password });
 
       Alert.alert("Registered!", "Your account has been created.", [
         {

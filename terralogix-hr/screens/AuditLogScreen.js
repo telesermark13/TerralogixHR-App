@@ -11,11 +11,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
-
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://terralogixhr-app-production.up.railway.app";
+import { useAuth } from "../AuthContext";
+import { API_BASE_URL } from "../api";
 
 export default function AuditLogScreen() {
   const { token } = useAuth();
@@ -48,7 +45,7 @@ export default function AuditLogScreen() {
 
   const client = useMemo(() => {
     const instance = axios.create({
-      baseURL: API_BASE,
+      baseURL: API_BASE_URL,
       timeout: 15000,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -83,7 +80,7 @@ export default function AuditLogScreen() {
         cancelRef.current = axios.CancelToken.source();
 
         // If your API supports ?page & ?search, pass them. If not, backend will ignore.
-        const res = await client.get("/api/audit-logs/", {
+        const res = await client.get("/audit-logs/", {
           params: { page: reset ? 1 : page, search: query || undefined },
           cancelToken: cancelRef.current.token,
         });

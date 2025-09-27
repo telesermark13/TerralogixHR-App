@@ -170,7 +170,7 @@ export default function ProfileScreen() {
       }
       // If remove requested and your API supports it, pass a null/empty flag
       const payload = {
-        id: profile.id,
+        id: originalProfile.id, // Use originalProfile.id to ensure it's not null
         full_name: profile.full_name.trim(),
         email: profile.email.trim(),
         ...(photoAsset?.remove ? { photo: null } : {}),

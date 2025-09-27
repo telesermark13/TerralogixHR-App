@@ -8,7 +8,7 @@ from .views import (
     admin_dashboard_stats, attendance_trend, dashboard_stats,
     admin_list_employees, admin_list_leaves, admin_decide_leave,
     admin_list_users, admin_demote_user, admin_reset_password,
-    invite_user, accept_invite,
+    accept_invite,
     admin_create_payslip, export_payslips_csv, export_payslips_excel, export_payslip_pdf_single,
     EmployeePhotoUploadView,
     UserViewSet, EmployeeViewSet, PayrollViewSet, PayslipViewSet, AttendanceViewSet,
@@ -62,7 +62,6 @@ urlpatterns = [
     path('admin/users/<int:user_id>/reset_password/', admin_reset_password),
 
     # invites
-    path('admin/invite-user/', invite_user),
     path('accept-invite/', accept_invite),
 
     # audit (CBV list kept)

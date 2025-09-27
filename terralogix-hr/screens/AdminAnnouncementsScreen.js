@@ -18,8 +18,10 @@ import {
   updateAnnouncement,
   deleteAnnouncement,
 } from "../api";
+import { useAuth } from "../AuthContext";
 
-export default function AdminAnnouncementsScreen() {
+export default function AdminAnnouncementsScreen({ navigation }) {
+  const { isStaff } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,9 +53,13 @@ export default function AdminAnnouncementsScreen() {
 
   // initial + search change
   useEffect(() => {
+    if (!isStaff) {
+      navigation.replace("Dashboard");
+      return;
+    }
     load({ reset: true }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, isStaff, navigation]);
 
   const normalizeResponse = (data) => {
     // Supports DRF pagination {results, next} or plain array

@@ -3,11 +3,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Linking, StyleSheet } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
-
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://terralogixhr-app-production.up.railway.app";
+import { useAuth } from "../AuthContext";
+import { API_BASE_URL } from "../api";
 
 export default function QRCheckinScreen() {
   const { token } = useAuth();
@@ -43,7 +40,7 @@ export default function QRCheckinScreen() {
 
   const client = useMemo(() => {
     return axios.create({
-      baseURL: API_BASE,
+      baseURL: API_BASE_URL,
       timeout: 15000,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -68,7 +65,7 @@ export default function QRCheckinScreen() {
         cancelRef.current = axios.CancelToken.source();
 
         const res = await client.post(
-          "/api/attendance/qr-checkin/",
+          "/attendance/qr-checkin/",
           { qr_data: data },
           { cancelToken: cancelRef.current.token }
         );

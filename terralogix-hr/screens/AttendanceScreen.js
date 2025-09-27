@@ -21,13 +21,7 @@ import {
   logout,
 } from "../api";
 
-import {
-  addPendingAttendance,
-  getPendingAttendance,
-  clearPendingAttendance,
-  saveAttendanceCache,
-  getAttendanceCache,
-} from "../utils/offline";
+import { queueAction, processQueue } from "../utils/offline";
 
 export default function AttendanceScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
@@ -67,11 +61,6 @@ export default function AttendanceScreen({ navigation }) {
     };
   };
 
-  const refreshPendingCount = useCallback(async () => {
-    const queued = await getPendingAttendance();
-    setPendingCount(queued.length);
-  }, []);
-
   const loadAttendance = useCallback(
     async (showAlert = false) => {
       setLoading(true);
@@ -79,7 +68,6 @@ export default function AttendanceScreen({ navigation }) {
       try {
         const res = await fetchAttendance();
         const list = Array.isArray(res) ? res : [];
-        await saveAttendanceCache(list);
         setHistory(list);
 
         const todayRec = list.find((i) => i.date === todayISO);
@@ -92,23 +80,13 @@ export default function AttendanceScreen({ navigation }) {
         if (showAlert) Alert.alert("Success", "Attendance refreshed from server!");
       } catch (err) {
         setOfflineMode(true);
-        const cached = (await getAttendanceCache()) || [];
-        setHistory(cached);
-
-        const todayRec = cached.find((i) => i.date === todayISO);
-        setTimeIn(todayRec?.time_in || null);
-        setTimeOut(todayRec?.time_out || null);
-        setStatus(
-          todayRec?.time_out ? "Timed Out" : todayRec?.time_in ? "Present" : "Timed Out"
-        );
         if (showAlert) Alert.alert("Offline", "Showing last available attendance.");
       } finally {
         setLoading(false);
         setRefreshing(false);
-        await refreshPendingCount();
       }
     },
-    [todayISO, refreshPendingCount]
+    [todayISO]
   );
 
   // Initial load
@@ -133,44 +111,20 @@ export default function AttendanceScreen({ navigation }) {
 
       // sync when we come back online
       if (reachable) {
-        const pending = await getPendingAttendance();
-        for (const action of pending) {
-          try {
-            if (action.type === "time-in") await postTimeIn(action.location || {});
-            if (action.type === "time-out") await postTimeOut(action.location || {});
-          } catch {
-            // keep it in queue; we'll try next time
-          }
-        }
-        if (pending.length > 0) {
-          await clearPendingAttendance();
-          await loadAttendance();
-        }
+        await processQueue();
+        await loadAttendance();
       }
-      await refreshPendingCount();
     });
     return () => unsub();
-  }, [loadAttendance, refreshPendingCount]);
+  }, [loadAttendance]);
 
   // Derived
   const todayRecord = history.find((item) => item.date === todayISO);
-
-  // Allow buttons if:
-  // - no pending for *today* (other days pending won't block)
-  // - not already acted
-  const pendingTodayCheck = async (type) => {
-    const p = await getPendingAttendance();
-    return p.some((x) => x.date === todayISO && x.type === type);
-  };
 
   // --- Actions ---
   const handleTimeIn = async () => {
     if (timeIn) {
       Alert.alert("Already Timed In", "You have already timed in for today.");
-      return;
-    }
-    if (await pendingTodayCheck("time-in")) {
-      Alert.alert("Pending", "Time In for today is already pending sync.");
       return;
     }
 
@@ -194,10 +148,9 @@ export default function AttendanceScreen({ navigation }) {
         setActionLoading((s) => ({ ...s, in: false }));
       }
     } else {
-      await addPendingAttendance({ type: "time-in", date: todayISO, location });
+      await queueAction("attendance", { type: "in", payload: { date: todayISO, location } });
       setTimeIn("OFFLINE");
       setStatus("Present");
-      await refreshPendingCount();
       setActionLoading((s) => ({ ...s, in: false }));
       Alert.alert("Offline", "Time In saved locally. Will sync when online.");
     }
@@ -210,10 +163,6 @@ export default function AttendanceScreen({ navigation }) {
     }
     if (timeOut) {
       Alert.alert("Already Timed Out", "You have already timed out for today.");
-      return;
-    }
-    if (await pendingTodayCheck("time-out")) {
-      Alert.alert("Pending", "Time Out for today is already pending sync.");
       return;
     }
 
@@ -237,10 +186,9 @@ export default function AttendanceScreen({ navigation }) {
         setActionLoading((s) => ({ ...s, out: false }));
       }
     } else {
-      await addPendingAttendance({ type: "time-out", date: todayISO, location });
+      await queueAction("attendance", { type: "out", payload: { date: todayISO, location } });
       setTimeOut("OFFLINE");
       setStatus("Timed Out");
-      await refreshPendingCount();
       setActionLoading((s) => ({ ...s, out: false }));
       Alert.alert("Offline", "Time Out saved locally. Will sync when online.");
     }
@@ -248,14 +196,6 @@ export default function AttendanceScreen({ navigation }) {
 
   // Logout (block if anything is pending)
   const handleLogout = async () => {
-    const pending = await getPendingAttendance();
-    if (pending.length > 0) {
-      Alert.alert(
-        "Can't logout",
-        "You have unsynced attendance actions. Please sync by going online first."
-      );
-      return;
-    }
     await logout();
     navigation.replace("LoginScreen");
   };
@@ -291,15 +231,6 @@ export default function AttendanceScreen({ navigation }) {
           View Check-ins on Map
         </Text>
       </TouchableOpacity>
-
-      {pendingCount > 0 && (
-        <View style={styles.pendingBanner}>
-          <Text style={{ color: "#fff" }}>
-            Pending: {pendingCount} unsynced attendance{" "}
-            {pendingCount > 1 ? "actions" : "action"}
-          </Text>
-        </View>
-      )}
 
       {offlineMode && (
         <Text style={{ color: "orange", marginBottom: 8 }}>Offline Mode</Text>

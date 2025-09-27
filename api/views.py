@@ -295,26 +295,6 @@ def save_push_token(request):
 def hr_only_view(request):
     return Response({"ok": True, "msg": "HR only!"})
 
-# --- User Invitation ---
-@api_view(['POST'])
-@permission_classes([IsAdminUser])
-def invite_user(request):
-    email = request.data.get('email')
-    if not email:
-        return Response({"error": "No email provided."}, status=400)
-    invite, created = UserInvitation.objects.get_or_create(email=email, defaults={'invited_by': request.user})
-    if not created and invite.accepted:
-        return Response({"error": "User already accepted invitation."}, status=400)
-    invite_url = f"https://terralogixhr-app-production.up.railway.app/accept-invite/{invite.token}/"
-    send_mail(
-        subject="You're invited to Terralogix HR!",
-        message=f"Welcome! Click here to register: {invite_url}",
-        from_email="Terralogix HR <noreply@terralogixhr.com>",
-        recipient_list=[email],
-        fail_silently=False,
-    )
-    return Response({"status": "Invitation sent", "invite_url": invite_url, "email": email})
-
 @api_view(['POST'])
 def accept_invite(request):
     token = request.data.get('token')

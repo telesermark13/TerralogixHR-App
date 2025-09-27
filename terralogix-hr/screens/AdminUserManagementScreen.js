@@ -18,8 +18,10 @@ import {
   demoteUser,
   resetUserPassword,
 } from "../api";
+import { useAuth } from "../AuthContext";
 
-export default function AdminUserManagementScreen() {
+export default function AdminUserManagementScreen({ navigation }) {
+  const { isStaff } = useAuth();
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState(""); // debounced
@@ -56,8 +58,12 @@ export default function AdminUserManagementScreen() {
   }, []);
 
   useEffect(() => {
+    if (!isStaff) {
+      navigation.replace("Dashboard");
+      return;
+    }
     loadUsers();
-  }, [loadUsers]);
+  }, [isStaff, navigation, loadUsers]);
 
   // Filter + sort (by role then name)
   const filtered = useMemo(() => {

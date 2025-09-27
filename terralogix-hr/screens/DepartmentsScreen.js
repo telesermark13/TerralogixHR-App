@@ -12,11 +12,8 @@ import {
   RefreshControl,
 } from "react-native";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
-
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://terralogixhr-app-production.up.railway.app";
+import { useAuth } from "../AuthContext";
+import { API_BASE_URL } from "../api";
 
 export default function DepartmentsScreen() {
   const { token } = useAuth();
@@ -40,7 +37,7 @@ export default function DepartmentsScreen() {
 
   const client = useMemo(() => {
     const instance = axios.create({
-      baseURL: API_BASE,
+      baseURL: API_BASE_URL,
       timeout: 15000,
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -59,7 +56,7 @@ export default function DepartmentsScreen() {
       try {
         cancelRef.current?.cancel?.("new departments request");
         cancelRef.current = axios.CancelToken.source();
-        const res = await client.get("/api/departments/", {
+        const res = await client.get("/departments/", {
           cancelToken: cancelRef.current.token,
         });
         const data = Array.isArray(res.data) ? res.data : res.data?.results ?? [];
@@ -113,7 +110,7 @@ export default function DepartmentsScreen() {
     }
     setCreating(true);
     try {
-      await client.post("/api/departments/", {
+      await client.post("/departments/", {
         name: name.trim(),
         description: desc.trim(),
       });
@@ -141,7 +138,7 @@ export default function DepartmentsScreen() {
     setBusy(id, true);
     try {
       // Prefer PATCH so other fields not wiped
-      await client.patch(`/api/departments/${id}/`, {
+      await client.patch(`/departments/${id}/`, {
         name: editName.trim(),
         description: editDesc.trim(),
       });
@@ -170,7 +167,7 @@ export default function DepartmentsScreen() {
         onPress: async () => {
           setBusy(id, true);
           try {
-            await client.delete(`/api/departments/${id}/`);
+            await client.delete(`/departments/${id}/`);
             if (editingId === id) cancelEdit();
             await load(false);
           } catch (e) {

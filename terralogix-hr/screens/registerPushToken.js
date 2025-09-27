@@ -3,9 +3,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform, Alert } from "react-native";
 import axios from "axios";
-
-const API_BASE = process.env.EXPO_PUBLIC_API_BASE_URL 
-  ?? "https://terralogixhr-app-production.up.railway.app";
+import { API_BASE_URL } from "../api";
 
 export async function registerPushToken(authToken) {
   try {
@@ -48,7 +46,7 @@ export async function registerPushToken(authToken) {
 
     // Save token to backend
     await axios.post(
-      `${API_BASE}/api/save-push-token/`,
+      `${API_BASE_URL}/save-push-token/`,
       { expo_push_token: expoPushToken },
       { headers: { Authorization: `Bearer ${authToken}` } }
     );

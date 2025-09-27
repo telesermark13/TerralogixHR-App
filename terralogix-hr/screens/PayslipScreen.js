@@ -15,6 +15,7 @@ import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute } from "@react-navigation/native";
 import { getPayslipById, savePayslipCache, getPayslipCache, BASE_URL } from "../api";
+import { useAuth } from "../AuthContext";
 
 const peso = (n) => {
   try {
@@ -32,6 +33,7 @@ const peso = (n) => {
 export default function PayslipScreen() {
   const route = useRoute();
   const payslipId = route.params?.payslipId;
+  const { isStaff } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
@@ -288,17 +290,19 @@ export default function PayslipScreen() {
         )}
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[styles.btn, styles.secondary, downloading && styles.btnDisabled]}
-        onPress={handleDownloadOfficial}
-        disabled={downloading}
-      >
-        {downloading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.btnText}>Download Official PDF</Text>
-        )}
-      </TouchableOpacity>
+      {isStaff && (
+        <TouchableOpacity
+          style={[styles.btn, styles.secondary, downloading && styles.btnDisabled]}
+          onPress={handleDownloadOfficial}
+          disabled={downloading}
+        >
+          {downloading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.btnText}>Download Official PDF</Text>
+          )}
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }

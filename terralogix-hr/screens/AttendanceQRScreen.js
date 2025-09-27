@@ -14,11 +14,8 @@ import {
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { useAuth } from "../context/AuthContext"; // must expose { token }
-
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://terralogixhr-app-production.up.railway.app";
+import { useAuth } from "../AuthContext";
+import { API_BASE_URL } from "../api";
 
 export default function AttendanceQRScreen() {
   const { token } = useAuth();
@@ -48,7 +45,7 @@ export default function AttendanceQRScreen() {
         cancelSrcRef.current?.cancel?.("New request initiated");
         cancelSrcRef.current = axios.CancelToken.source();
 
-        const res = await axios.get(`${API_BASE}/api/attendance/qr/`, {
+        const res = await axios.get(`${API_BASE_URL}/attendance/qr/`, {
           headers: { Authorization: `Bearer ${token}` },
           cancelToken: cancelSrcRef.current.token,
           responseType: "json",

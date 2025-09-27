@@ -11,8 +11,10 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { fetchAllAttendanceLocations } from "../api";
+import { useAuth } from "../AuthContext";
 
-export default function AdminAttendanceMapScreen() {
+export default function AdminAttendanceMapScreen({ navigation }) {
+  const { isStaff } = useAuth();
   const mapRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -32,12 +34,16 @@ export default function AdminAttendanceMapScreen() {
   }, []);
 
   useEffect(() => {
+    if (!isStaff) {
+      navigation.replace("Dashboard");
+      return;
+    }
     (async () => {
       setLoading(true);
       await load();
       setLoading(false);
     })();
-  }, [load]);
+  }, [isStaff, navigation, load]);
 
   // Distinct lists (sorted)
   const users = useMemo(() => {

@@ -1,6 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
-import { postTimeIn, postTimeOut, createLeave, clearPendingAttendance, clearPendingLeave } from '../api';
+import { postTimeIn, postTimeOut, createLeave } from '../api';
+
+export async function clearPendingAttendance() {
+  await AsyncStorage.removeItem("pendingAttendance");
+}
+
+export async function clearPendingLeave() {
+  await AsyncStorage.removeItem("pendingLeave");
+}
 
 export async function queueAction(type, data) {
   const key = type === 'attendance' ? 'pendingAttendance' : 'pendingLeave';

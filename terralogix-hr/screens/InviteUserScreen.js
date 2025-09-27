@@ -13,11 +13,8 @@ import {
   ScrollView,
 } from "react-native";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
-
-const API_BASE =
-  process.env.EXPO_PUBLIC_API_BASE_URL ??
-  "https://terralogixhr-app-production.up.railway.app";
+import { useAuth } from "../AuthContext";
+import { API_BASE_URL } from "../api";
 
 const EMAIL_RE =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // simple/robust enough regex
@@ -31,7 +28,7 @@ export default function InviteUserScreen() {
 
   const client = useMemo(() => {
     const instance = axios.create({
-      baseURL: API_BASE,
+      baseURL: API_BASE_URL,
       timeout: 15000,
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -72,7 +69,7 @@ export default function InviteUserScreen() {
       for (const email of parsedEmails) {
         try {
           await client.post(
-            "/api/invite/",
+            "/invitations/",
             { email },
             { cancelToken: cancelRef.current.token }
           );

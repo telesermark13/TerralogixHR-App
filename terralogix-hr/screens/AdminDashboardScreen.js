@@ -23,8 +23,10 @@ import {
 } from "../api";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { useAuth } from "../AuthContext";
 
 export default function AdminDashboardScreen({ navigation }) {
+  const { isStaff } = useAuth();
   const [stats, setStats] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [leaves, setLeaves] = useState([]);
@@ -71,8 +73,12 @@ export default function AdminDashboardScreen({ navigation }) {
   };
 
   useEffect(() => {
+    if (!isStaff) {
+      navigation.replace("Dashboard");
+      return;
+    }
     loadData();
-  }, []);
+  }, [isStaff, navigation]);
 
   const handleDecideLeave = async (leaveId, status) => {
     setActionLoading((l) => ({ ...l, [leaveId]: true }));
